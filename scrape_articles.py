@@ -25,9 +25,6 @@ def get_driver(url):
     return driver
 
 
-# endpoints = ["news", "topic/economic-news", "live/politics",
-#              "topic/stock-market-news", "topic/crypto"]
-
 endpoints = {"News": "news", "Economics": "topic/economic-news",
              "Politics": "live/politics", "Stocks": "topic/stock-market-news", "Crypto": "topic/crypto"}
 
@@ -68,5 +65,5 @@ for key, endpoint in endpoints.items():
 
         print()
 
-        db.execute("INSERT INTO articles VALUES (%s, %s, %s, %s, %s)", (
-            title, total_text, key, date, url))
+        db.execute("INSERT INTO articles VALUES (%s, %s, %s, %s, %s, %s)", (
+            title, total_text, "summary to be filled here", key, date, url))

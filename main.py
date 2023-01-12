@@ -1,3 +1,4 @@
+from create_db import *
 from connect_db import *
 from models import *
 
@@ -10,6 +11,8 @@ app = FastAPI()
 # uvicorn main:app --reload
 # https://fastapi.tiangolo.com/tutorial/path-params/
 origins = ["*"]
+
+create_db_script()
 
 app.add_middleware(
     CORSMiddleware,
@@ -36,8 +39,8 @@ async def get_articles():
 @app.post("/articles")
 async def post_articles(article: Article):
     try:
-        db.execute("INSERT INTO articles VALUES (%s, %s, %s, %s, %s)", (
-            article.title, article.summary, article.category, article.published_date, article.url))
+        db.execute("INSERT INTO articles VALUES (%s, %s, %s, %s, %s, %s)", (
+            article.title, article.actual_content, article.summary, article.category, article.published_date, article.url))
         return JSONResponse(content={"success": "true"}, status_code=200)
     except:
         return JSONResponse(content={"success": "false"})
