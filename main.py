@@ -32,8 +32,7 @@ async def root():
 async def get_articles():
     db.execute("SELECT * FROM articles")
     data = db.fetchall()
-    print(data)
-    return {"message": "Hello World"}
+    return {"message": data}
 
 
 @app.post("/articles")
