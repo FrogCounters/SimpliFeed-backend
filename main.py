@@ -32,7 +32,12 @@ async def root():
 async def get_articles():
     db.execute("SELECT * FROM articles")
     data = db.fetchall()
-    return {"message": data}
+
+    out = []
+    for i in data:
+        out.append({"title": i[0], "actual_content": i[1], "summary": i[2],
+                   "category": i[3], "published_date": i[4], "url": i[5]})
+    return out
 
 
 @app.post("/articles")
