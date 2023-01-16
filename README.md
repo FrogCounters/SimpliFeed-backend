@@ -1,5 +1,7 @@
 # SimpliFeed Backend
 
+### NOTE: As the backend is hosted using Render free tier, it will go in sleep mode after 15 minutes if inactive, which will take about 20-30 seconds to wake up. Please ignore initial loading time.
+
 Install libraries:
 ```
 pip install -r requirements.txt
