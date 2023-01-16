@@ -6,8 +6,20 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 
 import time
+import requests
 from connect_db import *
 from scrape_article import *
+
+
+def model_inference(train_text, model, tokenizer, torch_device):
+    """
+    Summarise 
+    """
+    batch = tokenizer.prepare_seq2seq_batch(
+        src_texts=train_text, return_tensors="pt").to(torch_device)
+    gen = model.generate(**batch)
+    res = tokenizer.batch_decode(gen, skip_special_tokens=True)
+    return res
 
 
 def get_driver(url):
@@ -49,6 +61,17 @@ for key, endpoint in endpoints.items():
         if "/video/" in url:
             continue
 
+        image_url = doc.find("div", {"class": "caas-img-container"})
+        if image_url:
+            img = image_url.find("img")
+            if "src" in img:
+                image_url = img["src"]
+            else:
+                image_url = ""
+        else:
+            image_url = ""
+        print(image_url)
+
         title = doc.find(
             "div", {"class": "caas-title-wrapper"}).find("h1").text
         date = doc.find("time").text
@@ -57,13 +80,15 @@ for key, endpoint in endpoints.items():
         p = doc.find("div", {"class": "caas-body"}).find_all("p")
         for i in p:
             total_text += i.text + "\n"
-        print(total_text)
 
-        #########################
-        ### SUMMARISE HERE ######
-        #########################
-
+        x = requests.post(
+            "https://0luimbkplf.execute-api.ap-southeast-1.amazonaws.com/initial/pred/", json={"inputs": total_text})
+        print(x.json())
         print()
 
-        db.execute("INSERT INTO articles VALUES (%s, %s, %s, %s, %s, %s)", (
-            title, total_text, "summary to be filled here", key, date, url))
+        try:
+            db.execute("INSERT INTO articles (title, actual_content, summary, category, published_date, image_url, url) VALUES (%s, %s, %s, %s, %s, %s, %s)", (
+                title, total_text, res[0], key, date, image_url, url))
+        except:
+            db.execute("INSERT INTO articles (title, actual_content, summary, category, published_date, image_url, url) VALUES (%s, %s, %s, %s, %s, %s, %s)", (
+                title, total_text, "ERROR", key, date, image_url, url))

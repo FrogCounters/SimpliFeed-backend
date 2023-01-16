@@ -3,11 +3,13 @@ from connect_db import *
 
 def create_db_script():
     db.execute("CREATE TABLE IF NOT EXISTS articles ("
+               "news_id SERIAL primary key, "
                "title VARCHAR, "
                "actual_content VARCHAR, "
                "summary VARCHAR, "
                "category VARCHAR(50), "
                "published_date TIMESTAMP, "
+               "image_url VARCHAR(250), "
                "url VARCHAR(250) "
                ")")
 

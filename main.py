@@ -25,25 +25,29 @@ app.add_middleware(
 
 @app.get("/")
 async def root():
-    return {"message": "Hello World"}
+    db.execute("SELECT news_id, title, summary, image_url, url FROM articles")
+    data = db.fetchall()
+    return data
+
+
+@app.get("/article")
+async def get_article(news_id: int = 1):
+    db.execute("SELECT * FROM articles WHERE news_id=%s", (news_id,))
+    data = db.fetchone()
+    return data
 
 
 @app.get("/articles")
 async def get_articles():
     db.execute("SELECT * FROM articles")
     data = db.fetchall()
-
-    out = []
-    for i in data:
-        out.append({"title": i[0], "actual_content": i[1], "summary": i[2],
-                   "category": i[3], "published_date": i[4], "url": i[5]})
-    return out
+    return data
 
 
-@app.post("/articles")
-async def post_articles(article: Article):
+@app.post("/article")
+async def post_article(article: Article):
     try:
-        db.execute("INSERT INTO articles VALUES (%s, %s, %s, %s, %s, %s)", (
+        db.execute("INSERT INTO articles (title, actual_content, summary, category, published_date, url) VALUES (%s, %s, %s, %s, %s, %s)", (
             article.title, article.actual_content, article.summary, article.category, article.published_date, article.url))
         return JSONResponse(content={"success": "true"}, status_code=200)
     except:

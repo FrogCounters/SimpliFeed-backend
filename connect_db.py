@@ -1,5 +1,6 @@
 import os
 import psycopg2
+from psycopg2.extras import RealDictCursor
 
 # If using database from Render
 if os.environ.get('DATABASE_URL'):
@@ -12,4 +13,4 @@ else:
                             "user=postgres "
                             "password=admin")
 conn.autocommit = True
-db = conn.cursor()
+db = conn.cursor(cursor_factory=RealDictCursor)
