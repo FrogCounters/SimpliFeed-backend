@@ -26,7 +26,7 @@ app.add_middleware(
 @app.get("/")
 async def root():
     db.execute("SELECT * FROM articles ORDER BY published_date DESC")
-    data = db.fetchone()
+    data = db.fetchall()
     return data
 
 
@@ -34,13 +34,6 @@ async def root():
 async def get_article(news_id: int = 1):
     db.execute("SELECT * FROM articles WHERE news_id=%s ORDER BY published_date DESC", (news_id,))
     data = db.fetchone()
-    return data
-
-
-@app.get("/articles")
-async def get_articles():
-    db.execute("SELECT * FROM articles")
-    data = db.fetchall()
     return data
 
 
