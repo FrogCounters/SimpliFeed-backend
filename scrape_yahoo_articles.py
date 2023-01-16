@@ -11,17 +11,6 @@ from connect_db import *
 from scrape_article_template import *
 
 
-def model_inference(train_text, model, tokenizer, torch_device):
-    """
-    Summarise 
-    """
-    batch = tokenizer.prepare_seq2seq_batch(
-        src_texts=train_text, return_tensors="pt").to(torch_device)
-    gen = model.generate(**batch)
-    res = tokenizer.batch_decode(gen, skip_special_tokens=True)
-    return res
-
-
 def get_driver(url):
     chrome_options = Options()
     chrome_options.add_argument('--no-sandbox')
@@ -70,7 +59,6 @@ for key, endpoint in endpoints.items():
                 image_url = ""
         else:
             image_url = ""
-        print(image_url)
 
         title = doc.find(
             "div", {"class": "caas-title-wrapper"}).find("h1").text
@@ -79,11 +67,11 @@ for key, endpoint in endpoints.items():
         total_text = ""
         p = doc.find("div", {"class": "caas-body"}).find_all("p")
         for i in p:
-            total_text += i.text + "\n"
+            if i.text not in ["(Add details)", "Most Read from Bloomberg", "Most Read from Bloomberg Businessweek"]:
+                total_text += i.text + "\n\n"
 
         x = requests.post(
             "https://0luimbkplf.execute-api.ap-southeast-1.amazonaws.com/initial/pred/", json={"inputs": total_text})
-        print(x.json())
         print()
 
         try:
