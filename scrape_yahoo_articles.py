@@ -8,7 +8,7 @@ from selenium.webdriver.common.by import By
 import time
 import requests
 from connect_db import *
-from scrape_article import *
+from scrape_article_template import *
 
 
 def model_inference(train_text, model, tokenizer, torch_device):
