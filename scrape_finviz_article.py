@@ -1,6 +1,3 @@
-import requests
-from bs4 import BeautifulSoup
-
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 import os
@@ -10,40 +7,16 @@ from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
 
 
-class Scraper:
-    headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) '
-                         'Chrome/50.0.2661.102 Safari/537.36'}
-    
-    def __init__(self, url):
-        self.url = url
-        self.response = requests.get(self.url, headers=Scraper.headers)
-    
-    def getDoc(self):
-        if not self.response.ok:
-            print('Status code:', self.response.status_code)
-            raise Exception('Failed to load page {}'.format(self.ur))
-        page_content = self.response.text
-        self.doc = BeautifulSoup(page_content, 'html.parser')
-        return self.doc
-
-    def getText(self):
-        total_text = ""
-        p = self.doc.find_all("p")
-        for i in p:
-            total_text += i.text + "\n"
-        
-        return total_text
-    
-    def _defaultParse(self):
-        self.getDoc()
-        self.getText()
-    
-    def parse(self):
-        self._defaultParse()
-    
-
+"""
+This script provides a base class with the general utility for any Selenium based web scraping needed for the simplifeed project.
+It is not intended to be used directly but instead inherited by a child classes that accounts for any major publisher's differences in website formatting.
+Selenium is used as many of the websites require javascript files to be run before displaying properly.
+"""
 class SeleniumScraper:
-
+    
+    """
+    The driver is used to load the javascript on websites as if a real user was using it
+    """
     @staticmethod
     def get_driver(url):
         chrome_options = Options()
@@ -68,13 +41,10 @@ class SeleniumScraper:
         self.article_title = title
         self.article_date = date
 
-    def check_exists_by_xpath(self, xpath):
-        try:
-            self.driver.find_element(By.XPATH, value=xpath)
-        except NoSuchElementException:
-            return False
-        return True
-
+    """
+    The default _getBody should be modified in most inherited classes based on the respective publisher's website format
+    """
+    
     def _getBody(self):
         total_text = ""
         ps = self.driver.find_elements(By.TAG_NAME, value='p')
@@ -82,9 +52,22 @@ class SeleniumScraper:
             total_text += p.text + "\n"
         self.article_body = total_text
     
+    # this is intended to be the public method that the main scraping script calls
     def getBody(self):
         self._getBody()
         return self.article_body
+
+    """
+    Utility method to check that the XPath intended for use actually exists in the current context.
+    XPath uses "path like" syntax to identify and navigate nodes in a website's HTML (or more generally in any XML document).
+    For more info refer to https://www.w3schools.com/xml/xpath_intro.asp
+    """
+    def check_exists_by_xpath(self, xpath):
+        try:
+            self.driver.find_element(By.XPATH, value=xpath)
+        except NoSuchElementException:
+            return False
+        return True
     
 
 class ScraperReuters(SeleniumScraper):

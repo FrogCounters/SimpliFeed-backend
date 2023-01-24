@@ -7,3 +7,4 @@ venv/
 .vscode
 scrape_yahoo_local_test.py
 tes.py
+Publishers/
