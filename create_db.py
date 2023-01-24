@@ -6,7 +6,7 @@ def create_db_script():
                "news_id SERIAL primary key, "
                "title VARCHAR, "
                "actual_content VARCHAR, "
-               "summary VARCHAR, "
+               "summary text[], "
                "category VARCHAR(50), "
                "published_date TIMESTAMP, "
                "image_url VARCHAR(250), "

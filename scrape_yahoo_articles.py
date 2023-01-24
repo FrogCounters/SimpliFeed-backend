@@ -10,6 +10,36 @@ import requests
 from connect_db import *
 from scrape_article_template import *
 
+import torch
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+
+torch_device = 'cuda' if torch.cuda.is_available() else 'cpu'
+tokenizer = AutoTokenizer.from_pretrained("maze508/fin-pegasus-tte")
+
+model = AutoModelForSeq2SeqLM.from_pretrained(
+    "maze508/fin-pegasus-tte").to(torch_device)
+
+def model_inference(train_text, model, tokenizer, torch_device):
+    """
+    Summarise based on different word length
+    """
+    batch = tokenizer.prepare_seq2seq_batch(
+        src_texts=train_text, return_tensors="pt").to(torch_device)
+
+    gen = model.generate(**batch)
+    res0 = tokenizer.batch_decode(gen, skip_special_tokens=True)[0]
+
+    gen = model.generate(**batch, min_length=30, max_length=30)
+    res1 = tokenizer.batch_decode(gen, skip_special_tokens=True)[0]
+
+    gen = model.generate(**batch, min_length=50, max_length=50)
+    res2 = tokenizer.batch_decode(gen, skip_special_tokens=True)[0]
+
+    gen = model.generate(**batch, min_length=100, max_length=100)
+    res3 = tokenizer.batch_decode(gen, skip_special_tokens=True)[0]
+    
+    return [res0, res1, res2, res3]
+
 
 def get_driver(url):
     chrome_options = Options()
@@ -70,13 +100,14 @@ for key, endpoint in endpoints.items():
             if i.text not in ["(Add details)", "Most Read from Bloomberg", "Most Read from Bloomberg Businessweek"]:
                 total_text += i.text + "\n\n"
 
-        x = requests.post(
-            "https://0luimbkplf.execute-api.ap-southeast-1.amazonaws.com/initial/pred/", json={"inputs": total_text})
-        print()
+        # x = requests.post("https://0luimbkplf.execute-api.ap-southeast-1.amazonaws.com/initial/pred/", json={"inputs": total_text})
+        # print(x)
+        res = model_inference([total_text], model, tokenizer, torch_device)
+        print(res[0])
 
         try:
             db.execute("INSERT INTO articles (title, actual_content, summary, category, published_date, image_url, url) VALUES (%s, %s, %s, %s, %s, %s, %s)", (
-                title, total_text, res[0], key, date, image_url, url))
+                title, total_text, f'{{"{res[0]}","{res[1]}","{res[2]}","{res[3]}"}}', key, date, image_url, url))
         except:
-            db.execute("INSERT INTO articles (title, actual_content, summary, category, published_date, image_url, url) VALUES (%s, %s, %s, %s, %s, %s, %s)", (
-                title, total_text, "ERROR", key, date, image_url, url))
+            print("ERROR")
+        print()
