@@ -40,9 +40,13 @@ async def get_article(news_id: int = 1):
 @app.post("/article")
 async def post_article(article: Article):
     try:
-        # TODO
-        db.execute("INSERT INTO articles (title, actual_content, summary, category, published_date, url) VALUES (%s, %s, %s, %s, %s, %s)", (
-            article.title, article.actual_content, article.summary, article.category, article.published_date, article.url))
+        summary = "{"
+        for i in article.summary:
+            summary += f'"{i}",'
+        summary = summary[:-1]
+        summary += "}"
+        db.execute("INSERT INTO articles (title, actual_content, summary, category, published_date, image_url, url) VALUES (%s, %s, %s, %s, %s, %s, %s)", (
+            article.title, article.actual_content, summary, article.category, article.published_date, article.image_url, article.url))
         return JSONResponse(content={"success": "true"}, status_code=200)
     except:
         return JSONResponse(content={"success": "false"})

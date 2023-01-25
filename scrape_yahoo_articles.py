@@ -29,16 +29,10 @@ def model_inference(train_text, model, tokenizer, torch_device):
     gen = model.generate(**batch)
     res0 = tokenizer.batch_decode(gen, skip_special_tokens=True)[0]
 
-    gen = model.generate(**batch, min_length=30, max_length=30)
+    gen = model.generate(**batch, min_length=64, max_length=128)
     res1 = tokenizer.batch_decode(gen, skip_special_tokens=True)[0]
 
-    gen = model.generate(**batch, min_length=50, max_length=50)
-    res2 = tokenizer.batch_decode(gen, skip_special_tokens=True)[0]
-
-    gen = model.generate(**batch, min_length=100, max_length=100)
-    res3 = tokenizer.batch_decode(gen, skip_special_tokens=True)[0]
-    
-    return [res0, res1, res2, res3]
+    return [res0, res1]
 
 
 def get_driver(url):
@@ -107,7 +101,7 @@ for key, endpoint in endpoints.items():
 
         try:
             db.execute("INSERT INTO articles (title, actual_content, summary, category, published_date, image_url, url) VALUES (%s, %s, %s, %s, %s, %s, %s)", (
-                title, total_text, f'{{"{res[0]}","{res[1]}","{res[2]}","{res[3]}"}}', key, date, image_url, url))
+                title, total_text, f'{{"{res[0]}","{res[1]}"}}', key, date, image_url, url))
         except:
             print("ERROR")
         print()
